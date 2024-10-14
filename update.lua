@@ -1,2 +1,2 @@
-print("Hey")
+print("Heyo")
 sleep(4)
