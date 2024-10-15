@@ -308,6 +308,7 @@ function Update0_1_1()
 end
 
 function Update0_1_2()
+    shell.run("move /crom/autorun/init.lua /boot/init.lua")
     shell.run("rm /crom/help/changelog.md")
     shell.run("rm /crom/help/credits.md")
     shell.run("rm /crom/help/speaker.md")
