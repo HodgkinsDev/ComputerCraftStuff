@@ -1,5 +1,3 @@
-print("g")
-sleep(4)
 function downloadClone()
     local url = "https://gist.githubusercontent.com/SquidDev/e0f82765bfdefd48b0b15a5c06c0603b/raw/06be706a772fa0a64195be1146bff6360c04d27c/clone.lua"
     local filePath = "crom/programs/clone.lua"
@@ -230,6 +228,6 @@ end
 
 if fkernel.getVersion() == "0.1.1" then
 	--UpdateCode
-	UpdateVersion("NEXTVER")
-	os.reboot()
+	--UpdateVersion("NEXTVER")
+	--os.reboot()
 end
