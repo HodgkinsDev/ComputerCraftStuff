@@ -215,7 +215,7 @@ function Update0_1_1()
     end
     file.close()  -- Close the file after writing
     downloadClone()
-	updateFiles_0_1_1()
+    updateFiles_0_1_1()
     return 0  -- Return 0 on success
 end
 
