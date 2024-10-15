@@ -28,7 +28,7 @@ end
 
 while true do
 	shell.run("clear")
-	print("CC-CFW-Fr0styOS Installer 0.1")
+	print("CC-CFW-Fr0stOS Installer 0.1")
 	print("OS and Installer Written by Jacob Hodgkins")
 	io.write("\nInstall(Y/N):")
 	input = io.read()
@@ -45,7 +45,7 @@ end
 
 print("\nDownloading Git Cloner Credits:SquidDev")
 downloadClone()
-print("\nCloning Fr0styOS")
+print("\nCloning Fr0stOS")
 shell.run("clone.lua https://github.com/HodgkinsDev/CC-CFW-Fr0stOS.git")
 print("\nMoving OS Files")
 shell.run("move CC-CFW-Fr0stOS/* /")
