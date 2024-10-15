@@ -228,6 +228,6 @@ end
 
 if fkernel.getVersion() == "0.1.1" then
 	--UpdateCode
-	--UpdateVersion("NEXTVER")
-	--os.reboot()
+	UpdateVersion("NEXTVER")
+	os.reboot()
 end
