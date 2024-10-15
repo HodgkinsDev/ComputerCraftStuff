@@ -63,6 +63,30 @@ function UpdateVersion(ver)
     
     return 0  -- Return 0 on success
 end
+function createHelpFile()
+    local helpFilePath = "/crom/help/clone.txt"
+    
+    -- Open the file in write mode
+    local file = fs.open(helpFilePath, "w")
+    if not file then
+        return 1  -- Return 1 if the file cannot be opened for writing
+    end
+
+    -- Define the content to write to the file
+    local content = [[
+clone is able to clone and download entire github repo
+
+Written by SquidDev (Thanks https://gist.github.com/SquidDev/e0f82765bfdefd48b0b15a5c06c0603b)
+
+clone.lua URL [name]
+]]
+
+    -- Write the content to the file
+    file.write(content)
+    file.close()  -- Close the file after writing
+
+    return 0  -- Return 0 on success
+end
 
 function updateFiles_0_1_1()
     local startupPath = "/crom/startup.lua"
@@ -219,6 +243,14 @@ function Update0_1_1()
     return 0  -- Return 0 on success
 end
 
+function Update0_1_2()
+    shell.run("rm /crom/help/changelog.md")
+    shell.run("rm /crom/help/credits.md")
+    shell.run("rm /crom/help/speaker.md")
+    shell.run("rm /crom/help/whatsnew.md")
+    createHelpFile()
+end
+
 
 if fkernel.getVersion() == "0.1" then
 	Update0_1_1()
@@ -227,7 +259,7 @@ if fkernel.getVersion() == "0.1" then
 end
 
 if fkernel.getVersion() == "0.1.1" then
-	--UpdateCode
-	--UpdateVersion("NEXTVER")
-	--os.reboot()
+	Update0_1_2()
+	UpdateVersion("0.1.2")
+	os.reboot()
 end
