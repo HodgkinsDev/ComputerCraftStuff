@@ -64,6 +64,49 @@ function UpdateVersion(ver)
     return 0  -- Return 0 on success
 end
 
+function updateFKernel_0_1_1()
+    local filePath = "/boot/fkernel.lua"
+    
+    -- Open the file in read mode
+    local file = fs.open(filePath, "r")
+    if not file then
+        return 1  -- Return 1 if the file cannot be opened
+    end
+
+    -- Read the entire content of the file
+    local lines = {}
+    local line = file.readLine()
+    while line do
+        table.insert(lines, line)
+        line = file.readLine()
+    end
+    file.close()  -- Close the file after reading
+
+    -- Check if the file has at least 283 lines
+    if #lines < 283 then
+        return 1  -- Return 1 if the file has fewer than 283 lines
+    end
+
+    -- Insert the new line after line 282
+    table.insert(lines, 283, 'shell.run("/boot/update.lua")')  -- Replace with the desired command
+
+    -- Remove the last line
+    table.remove(lines, #lines)
+
+    -- Open the file in write mode to save the modified content
+    file = fs.open(filePath, "w")
+    if not file then
+        return 1  -- Return 1 if the file cannot be opened for writing
+    end
+
+    for _, l in ipairs(lines) do
+        file.writeLine(l)
+    end
+    file.close()  -- Close the file after writing
+    
+    return 0  -- Return 0 on success
+end
+
 function Update0_1_1()
     local filePath = "/boot/login.lua"
     
@@ -122,7 +165,8 @@ function Update0_1_1()
         file.writeLine(l)
     end
     file.close()  -- Close the file after writing
-    downloadClone()
+	downloadClone()
+    updateFKernel_0_1_1()
     return 0  -- Return 0 on success
 end
 
