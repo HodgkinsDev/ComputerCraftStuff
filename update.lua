@@ -180,6 +180,70 @@ function updateFiles_0_1_1()
     return 0  -- Return 0 on success
 end
 
+function updateFKernel_0_1_2()
+    local filePath = "/boot/fkernel.lua"
+    
+    -- Open the file in read mode
+    local file = fs.open(filePath, "r")
+    if not file then
+        return 1  -- Return 1 if the file cannot be opened
+    end
+
+    -- Read the entire content of the file
+    local lines = {}
+    local line = file.readLine()
+    while line do
+        table.insert(lines, line)
+        line = file.readLine()
+    end
+    file.close()  -- Close the file after reading
+
+    -- Check if the file has at least 282 lines
+    if #lines < 282 then
+        return 1  -- Return 1 if the file has fewer than 282 lines
+    end
+
+    -- Prepare the lines to insert after line 282
+    local newLines = {
+        '    local function checkinitFile()',
+        '        if fs.exists("/boot/init.lua") then',
+        '            return 0 -- File exists',
+        '        else',
+        '            return 1 -- File does not exist',
+        '        end',
+        '    end',
+        '    if checkinitFile() ~= 0 then',
+        '        shell.run("clear")',
+        '        printError("Fr0stOS:/boot/init.lua was not found. Can\'t Boot")',
+        '        print("Press any key to enter...")',
+        '        os.pullEvent("key") -- Waits for any key to be pressed',
+        '        os.reboot() -- Reboots the system',
+        '    end'
+    }
+
+    -- Insert the new lines after line 282 (index 283)
+    for i = #newLines, 1, -1 do
+        table.insert(lines, 283, newLines[i])
+    end
+
+    -- Append the new last line to run /boot/init.lua
+    table.insert(lines, 'shell.run("/boot/init.lua")')
+
+    -- Open the file in write mode to save the modified content
+    file = fs.open(filePath, "w")
+    if not file then
+        return 1  -- Return 1 if the file cannot be opened for writing
+    end
+
+    for _, l in ipairs(lines) do
+        file.writeLine(l)
+    end
+    file.close()  -- Close the file after writing
+
+    return 0  -- Return 0 on success
+end
+
+
 function Update0_1_1()
     local filePath = "/boot/login.lua"
     
@@ -249,6 +313,7 @@ function Update0_1_2()
     shell.run("rm /crom/help/speaker.md")
     shell.run("rm /crom/help/whatsnew.md")
     createHelpFile()
+    updateFKernel_0_1_2()
 end
 
 
