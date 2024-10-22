@@ -317,6 +317,329 @@ function Update0_1_2()
     updateFKernel_0_1_2()
 end
 
+function StartupFileUpdate0_1_3()
+    local filePath = "/crom/startup.lua"
+    local aliasLine = 'shell.setAlias("cls", "clear")'
+
+    -- Open the file for reading
+    local file = fs.open(filePath, "r")
+    local lines = {}
+    
+    -- Read all lines into a table
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+    end
+    file.close()
+
+    -- Insert the alias line after line 20
+    table.insert(lines, 21, aliasLine)
+
+    -- Open the file for writing and write the updated content
+    local fileWrite = fs.open(filePath, "w")
+    for _, line in ipairs(lines) do
+        fileWrite.writeLine(line)
+    end
+    fileWrite.close()
+end
+
+function CD2Home2Init0_1_3()
+	local shellFilePath = "/crom/programs/shell.lua"
+    local initFilePath = "/boot/init.lua"
+    local startLine = 442
+    local endLine = 445
+
+    -- Open /crom/programs/shell.lua for reading
+    local file = fs.open(shellFilePath, "r")
+    local lines = {}
+    local storedLines = {}
+
+    -- Read all lines and store lines 442-445
+    local lineNumber = 0
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        lineNumber = lineNumber + 1
+        if lineNumber >= startLine and lineNumber <= endLine then
+            -- Remove leading whitespace from the stored lines
+            local trimmedLine = string.gsub(line, "^%s+", "")
+            table.insert(storedLines, trimmedLine)
+        else
+            table.insert(lines, line)
+        end
+    end
+    file.close()
+
+    -- Write remaining lines back to /crom/programs/shell.lua
+    local fileWrite = fs.open(shellFilePath, "w")
+    for _, line in ipairs(lines) do
+        fileWrite.writeLine(line)
+    end
+    fileWrite.close()
+
+    -- Open /boot/init.lua for reading
+    local initFile = fs.open(initFilePath, "r")
+    local initLines = {}
+
+    -- Read all lines from /boot/init.lua
+    while true do
+        local line = initFile.readLine()
+        if not line then break end
+        table.insert(initLines, line)
+    end
+    initFile.close()
+
+    -- Insert stored lines after line 3
+    for i = 1, #storedLines do
+        table.insert(initLines, 4 + i - 1, storedLines[i])
+    end
+
+    -- Write the updated /boot/init.lua file
+    local initFileWrite = fs.open(initFilePath, "w")
+    for _, line in ipairs(initLines) do
+        initFileWrite.writeLine(line)
+    end
+    initFileWrite.close()
+end
+
+function createBrainfuckHelpFile()
+    local helpFilePath = "/crom/help/bf.txt"
+    local helpContent = [[
+USAGE: bf <bf file>
+
+You can also run BF on its own without arguments to use the interpreter/visualizer.
+
+It's also global, and you can run .bf programs just like Lua programs.
+
+No need to type bf <filename>; just simply type your BF file example.bf and it will run.
+]]
+
+    -- Open the file for writing
+    local file = fs.open(helpFilePath, "w")
+
+    -- Write the Brainfuck usage instructions to the file
+    file.write(helpContent)
+
+    -- Close the file
+    file.close()
+end
+
+local function insertFsCopyFunction()
+    local filePath = "/boot/fkernel.lua"
+    
+    -- Read the file content
+    local file = fs.open(filePath, "r")
+    local lines = {}
+    
+    -- Store all lines in a table
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+    end
+    file.close()
+    
+    -- Insert the new function after line 173
+    local newFunction = [[
+_G["fs"]["copy"] = function(fromPath, toPath)
+    fromPath = normalizePath(fromPath)
+    toPath = normalizePath(toPath)
+
+    -- Check if either 'fromPath' or 'toPath' is read-only
+    if isReadOnly(fromPath) or isReadOnly(toPath) then
+        return nil
+    else
+        return old_fsCopy(fromPath, toPath)
+    end
+end
+]]
+
+    -- Insert the new function after line 173
+    table.insert(lines, 174, newFunction)
+    
+    -- Write the modified content back to the file
+    file = fs.open(filePath, "w")
+    for _, line in ipairs(lines) do
+        file.writeLine(line)
+    end
+    file.close()
+end
+local function removeLines174To206()
+    local filePath = "/boot/fkernel.lua"
+    
+    -- Read the file content
+    local file = fs.open(filePath, "r")
+    local lines = {}
+    
+    -- Store all lines in a table
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+    end
+    file.close()
+    
+    -- Remove lines 174 to 206 (inclusive)
+    for i = 206, 174, -1 do
+        table.remove(lines, i)
+    end
+    
+    -- Write the modified content back to the file
+    file = fs.open(filePath, "w")
+    for _, line in ipairs(lines) do
+        file.writeLine(line)
+    end
+    file.close()
+end
+local function removeLines144To173()
+    local filePath = "/boot/fkernel.lua"
+    
+    -- Read the file content
+    local file = fs.open(filePath, "r")
+    local lines = {}
+    
+    -- Store all lines in a table
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+    end
+    file.close()
+    
+    -- Remove lines 144 to 173 (inclusive)
+    for i = 173, 144, -1 do
+        table.remove(lines, i)
+    end
+    
+    -- Write the modified content back to the file
+    file = fs.open(filePath, "w")
+    for _, line in ipairs(lines) do
+        file.writeLine(line)
+    end
+    file.close()
+end
+
+local function insertFsCopyFunctionAfter159()
+    local filePath = "/boot/fkernel.lua"
+    
+    -- Read the file content
+    local file = fs.open(filePath, "r")
+    local lines = {}
+    
+    -- Store all lines in a table
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+    end
+    file.close()
+    
+    -- Define the new function to insert
+    local newFunction = [[
+_G["fs"]["copy"] = function(fromPath, toPath)
+    fromPath = normalizePath(fromPath)
+    toPath = normalizePath(toPath)
+
+    -- Check if either 'fromPath' or 'toPath' is read-only
+    if isReadOnly(fromPath) or isReadOnly(toPath) then
+        return nil
+    else
+        return old_fsCopy(fromPath, toPath)
+    end
+end
+]]
+
+    -- Insert the new function after line 159
+    table.insert(lines, 160, newFunction)
+    
+    -- Write the modified content back to the file
+    file = fs.open(filePath, "w")
+    for _, line in ipairs(lines) do
+        file.writeLine(line)
+    end
+    file.close()
+end
+
+local function insertFsMoveFunctionAfter170()
+    local filePath = "/boot/fkernel.lua"
+    
+    -- Read the file content
+    local file = fs.open(filePath, "r")
+    local lines = {}
+    
+    -- Store all lines in a table
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+    end
+    file.close()
+    
+    -- Define the new function to insert
+    local newFunction = [[
+_G["fs"]["move"] = function(fromPath, toPath)
+    fromPath = normalizePath(fromPath)
+    toPath = normalizePath(toPath)
+
+    -- Check if either 'fromPath' or 'toPath' is read-only
+    if isReadOnly(fromPath) or isReadOnly(toPath) then
+        return nil
+    else
+        return old_fsMove(fromPath, toPath)
+    end
+end
+]]
+
+    -- Insert the new function after line 170
+    table.insert(lines, 171, newFunction)
+    
+    -- Write the modified content back to the file
+    file = fs.open(filePath, "w")
+    for _, line in ipairs(lines) do
+        file.writeLine(line)
+    end
+    file.close()
+end
+
+local function CleanUp0_1_3()
+    local filePath = "/boot/fkernel.lua"
+    
+    -- Read the file content
+    local file = fs.open(filePath, "r")
+    local lines = {}
+    
+    -- Store all lines in a table
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+    end
+    file.close()
+    
+    -- Remove lines 183 and 182 (in reverse order)
+    table.remove(lines, 183)  -- Remove line 183 first
+    table.remove(lines, 182)  -- Remove line 182 next
+    
+    -- Write the modified content back to the file
+    file = fs.open(filePath, "w")
+    for _, line in ipairs(lines) do
+        file.writeLine(line)
+    end
+    file.close()
+end
+
+
+function Update0_1_3()
+	StartupFileUpdate0_1_3()
+	CD2Home2Init0_1_3()
+	createBrainfuckHelpFile()
+	removeLines174To206()
+	removeLines144To173()
+	insertFsCopyFunctionAfter159()
+	insertFsMoveFunctionAfter170()
+	CleanUp0_1_3()
+end
 
 if fkernel.getVersion() == "0.1" then
 	Update0_1_1()
@@ -327,5 +650,11 @@ end
 if fkernel.getVersion() == "0.1.1" then
 	Update0_1_2()
 	UpdateVersion("0.1.2")
+	os.reboot()
+end
+
+if fkernel.getVersion() == "0.1.2" then
+	Update0_1_3()
+	UpdateVersion("0.1.3")
 	os.reboot()
 end
