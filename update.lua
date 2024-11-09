@@ -629,6 +629,80 @@ local function CleanUp0_1_3()
     file.close()
 end
 
+function Update0_1_4()
+    -- First, modify /crom/apis/fkernel.lua
+    local fkernelPath = "/crom/apis/fkernel.lua"
+    local fkernelInsertionLine = 15
+    
+    -- Define the sanitizePath function to be inserted
+    local sanitizeFunctionCode = [[
+function sanitizePath(path)
+    -- Remove all `?` and `*` characters
+    path = path:gsub("[%?%*]", "")
+    
+    -- Replace instances of double slashes `//` with a single slash `/`
+    while path:find("//") do
+        path = path:gsub("//", "/")
+    end
+
+    return path
+end
+]]
+    
+    -- Read /crom/apis/fkernel.lua into a table of lines
+    local file = fs.open(fkernelPath, "r")
+    local fkernelLines = {}
+
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(fkernelLines, line)
+    end
+    file.close()
+    
+    -- Insert the sanitizePath function at line 15
+    table.insert(fkernelLines, fkernelInsertionLine, sanitizeFunctionCode)
+    
+    -- Write the modified /crom/apis/fkernel.lua back to the file
+    file = fs.open(fkernelPath, "w")
+    for _, line in ipairs(fkernelLines) do
+        file.writeLine(line)
+    end
+    file.close()
+    
+    -- Now, modify /crom/programs/shell.lua
+    local shellPath = "/crom/programs/shell.lua"
+    local shellReplaceLine = 432
+    
+    -- Define the content for replacement and insertion
+    local shellReplaceLineContent = [[        write(fkernel.sanitizePath(shell.dir()) .. "> ")]]
+    local shellInsertLineContent = [[        shell.setDir(fkernel.sanitizePath(shell.dir()))]]
+    
+    -- Read /crom/programs/shell.lua into a table of lines
+    file = fs.open(shellPath, "r")
+    local shellLines = {}
+
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(shellLines, line)
+    end
+    file.close()
+    
+    -- Replace line 432 and insert a line before it
+    shellLines[shellReplaceLine] = shellReplaceLineContent
+    table.insert(shellLines, shellReplaceLine, shellInsertLineContent)
+    
+    -- Write the modified /crom/programs/shell.lua back to the file
+    file = fs.open(shellPath, "w")
+    for _, line in ipairs(shellLines) do
+        file.writeLine(line)
+    end
+    file.close()
+end
+
+
+
 
 function Update0_1_3()
 	StartupFileUpdate0_1_3()
@@ -656,5 +730,15 @@ end
 if fkernel.getVersion() == "0.1.2" then
 	Update0_1_3()
 	UpdateVersion("0.1.3")
+	os.reboot()
+end
+if fkernel.getVersion() == "0.1.2" then
+	Update0_1_3()
+	UpdateVersion("0.1.3")
+	os.reboot()
+end
+if fkernel.getVersion() == "0.1.3" then
+	Update0_1_4()
+	UpdateVersion("0.1.4")
 	os.reboot()
 end
