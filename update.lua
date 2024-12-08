@@ -715,6 +715,81 @@ function Update0_1_3()
 	CleanUp0_1_3()
 end
 
+function Update0_1_5()
+    -- Hardcoded file path and line number
+    local filePath = "/crom/apis/fkernel.lua"
+    local lineNum = 65
+
+    -- Code to insert
+    local codeToInsert = [[
+-- Function to fetch your public IP address
+function getIPAddress()
+    -- Ensure HTTP API is enabled in your ComputerCraft settings
+    if not http then
+        print("HTTP API is not enabled. Check your ComputerCraft configuration.")
+        return
+    end
+    local url = "http://ipinfo.io/ip" -- Or use "https://httpbin.org/ip"
+    local response = http.get(url)
+    if response then
+        local ip = response.readAll()
+        response.close()
+        return ip:match("^%s*(.-)%s*$") -- Trim whitespace
+    else
+        return "N/A"
+    end
+end
+]]
+
+    -- Open the file for reading
+    local file = fs.open(filePath, "r")
+    if not file then
+        print("Error: Could not open file at " .. filePath)
+        return false
+    end
+
+    -- Read all lines into a table
+    local lines = {}
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+    end
+    file.close()
+
+    -- Validate line number
+    if lineNum < 1 or lineNum > #lines then
+        print("Error: Invalid line number.")
+        return false
+    end
+
+    -- Insert the code after the specified line
+    local newLines = {}
+    for i, line in ipairs(lines) do
+        table.insert(newLines, line)
+        if i == lineNum then
+            -- Split the code into separate lines and insert
+            for codeLine in codeToInsert:gmatch("[^\r\n]+") do
+                table.insert(newLines, codeLine)
+            end
+        end
+    end
+
+    -- Open the file for writing and save changes
+    local writeFile = fs.open(filePath, "w")
+    if not writeFile then
+        print("Error: Could not open file for writing at " .. filePath)
+        return false
+    end
+    for _, line in ipairs(newLines) do
+        writeFile.writeLine(line)
+    end
+    writeFile.close()
+    
+    print("Code successfully inserted into " .. filePath)
+    return true
+end
+
 if fkernel.getVersion() == "0.1" then
 	Update0_1_1()
 	UpdateVersion("0.1.1")
@@ -740,5 +815,10 @@ end
 if fkernel.getVersion() == "0.1.3" then
 	Update0_1_4()
 	UpdateVersion("0.1.4")
+	os.reboot()
+end
+if fkernel.getVersion() == "0.1.4" then
+	Update0_1_5()
+	UpdateVersion("0.1.5")
 	os.reboot()
 end
