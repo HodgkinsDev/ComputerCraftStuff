@@ -790,6 +790,34 @@ end
     return true
 end
 
+local function appendToInit()
+    local filePath = "/boot/init.lua"
+
+    -- Read the current contents of the file
+    local file = fs.open(filePath, "r")
+    if not file then
+        print("Error: Could not open " .. filePath)
+        return false
+    end
+    local content = file.readAll()
+    file.close()
+
+    -- Append the new lines
+    content = content .. "\nif fs.exists(\"/.tmp\") then\n    fs.delete(\"/.tmp\")\nend\nfs.makeDir(\"/.tmp\")\n"
+
+    -- Write back to the file
+    file = fs.open(filePath, "w")
+    if not file then
+        print("Error: Could not write to " .. filePath)
+        return false
+    end
+    file.write(content)
+    file.close()
+
+    return true
+end
+
+
 if fkernel.getVersion() == "0.1" then
 	Update0_1_1()
 	UpdateVersion("0.1.1")
@@ -807,11 +835,6 @@ if fkernel.getVersion() == "0.1.2" then
 	UpdateVersion("0.1.3")
 	os.reboot()
 end
-if fkernel.getVersion() == "0.1.2" then
-	Update0_1_3()
-	UpdateVersion("0.1.3")
-	os.reboot()
-end
 if fkernel.getVersion() == "0.1.3" then
 	Update0_1_4()
 	UpdateVersion("0.1.4")
@@ -820,5 +843,10 @@ end
 if fkernel.getVersion() == "0.1.4" then
 	Update0_1_5()
 	UpdateVersion("0.1.5")
+	os.reboot()
+end
+if fkernel.getVersion() == "0.1.5" then
+	appendToInit()
+	UpdateVersion("0.1.5.1")
 	os.reboot()
 end
