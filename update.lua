@@ -835,6 +835,38 @@ local function insertIntoFKernel()
     return true
 end
 
+function update_512()
+    local filePath = "/boot/fkernel.lua"
+    local lines = {}
+    local lineToInsert = 'if fs.exists("/tmp") then\n    fs.delete("/tmp")\nend\nfs.makeDir("/tmp")'
+    local targetLine = 275
+
+    -- Read the file and store each line in the 'lines' table
+    local file = fs.open(filePath, "r")
+    if file then
+        for line in file.readLine do
+            table.insert(lines, line)
+        end
+        file.close()
+
+        -- Insert the new lines after line 275
+        table.insert(lines, targetLine + 1, lineToInsert)
+
+        -- Rewrite the file with the new content
+        local file = fs.open(filePath, "w")
+        if file then
+            for _, line in ipairs(lines) do
+                file.writeLine(line)
+            end
+            file.close()
+        else
+            print("Failed to open file for writing.")
+        end
+    else
+        print("Failed to open file.")
+    end
+end
+
 
 if fkernel.getVersion() == "0.1" then
 	Update0_1_1()
@@ -866,5 +898,11 @@ end
 if fkernel.getVersion() == "0.1.5" then
 	insertIntoFKernel()
 	UpdateVersion("0.1.5.1")
+	os.reboot()
+end
+
+if fkernel.getVersion() == "0.1.5.12" then
+	insertIntoFKernel()
+	UpdateVersion("0.1.5.2")
 	os.reboot()
 end
