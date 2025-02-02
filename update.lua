@@ -790,28 +790,46 @@ end
     return true
 end
 
-local function appendToInit()
-    local filePath = "/boot/init.lua"
+local function insertIntoFKernel()
+    local filePath = "/boot/fkernel.lua"
 
-    -- Read the current contents of the file
+    -- Read the existing file content
     local file = fs.open(filePath, "r")
     if not file then
         print("Error: Could not open " .. filePath)
         return false
     end
-    local content = file.readAll()
+    local lines = {}
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+    end
     file.close()
 
-    -- Append the new lines
-    content = content .. "\nif fs.exists(\"/.tmp\") then\n    fs.delete(\"/.tmp\")\nend\nfs.makeDir(\"/.tmp\")\n"
+    -- Define the lines to insert
+    local insertLines = {
+        "if fs.exists(\"/.tmp\") then",
+        "    fs.delete(\"/.tmp\")",
+        "end",
+        "fs.makeDir(\"/.tmp\")"
+    }
 
-    -- Write back to the file
+    -- Insert at line 272 (after line 271)
+    local insertPos = 272
+    for i, v in ipairs(insertLines) do
+        table.insert(lines, insertPos + i - 1, v)
+    end
+
+    -- Write back the modified content
     file = fs.open(filePath, "w")
     if not file then
         print("Error: Could not write to " .. filePath)
         return false
     end
-    file.write(content)
+    for _, line in ipairs(lines) do
+        file.writeLine(line)
+    end
     file.close()
 
     return true
@@ -846,7 +864,7 @@ if fkernel.getVersion() == "0.1.4" then
 	os.reboot()
 end
 if fkernel.getVersion() == "0.1.5" then
-	appendToInit()
+	insertIntoFKernel()
 	UpdateVersion("0.1.5.1")
 	os.reboot()
 end
