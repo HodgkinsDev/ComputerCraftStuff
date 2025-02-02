@@ -835,6 +835,76 @@ local function insertIntoFKernel()
     return true
 end
 
+function update_513()
+    -- Path to the fkernel.lua file
+    local filePath = "/boot/fkernel.lua"
+
+    -- Read the file contents into a table, each element being a line
+    local file = fs.open(filePath, "r")
+    if not file then
+        print("Error: Unable to open fkernel.lua.")
+        return
+    end
+
+    local lines = {}
+    local lineNumber = 1
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+        lineNumber = lineNumber + 1
+    end
+    file.close()
+
+    -- Insert the function after line 197
+    local insertPosition = 197
+    local functionToInsert = [[
+function fs.setReadOnlyForAllFiles(path, readOnly)
+    SystemRan = fkernel.SysCall()
+    if fkernel.getPermissions() == "User" and readOnly == false and SystemRan == false then
+        print("Only Admins can disable readOnly")
+        return
+    else
+        local function setReadOnlyRecursive(currentPath)
+            -- Skip /.tmp folder and its contents
+            if currentPath == "/.tmp" or currentPath:sub(1, 5) == "/.tmp" then
+                return  -- Skip this folder and all its subdirectories/files
+            end
+            
+            local items = fs.list(currentPath)
+            for _, item in ipairs(items) do
+                local fullPath = fs.combine(currentPath, item)
+                if fs.isDir(fullPath) then
+                    fs.setReadOnlyFile(fullPath, readOnly)  
+                    setReadOnlyRecursive(fullPath)  -- Recurse into subdirectory
+                else
+                    fs.setReadOnlyFile(fullPath, readOnly)
+                end
+            end
+        end
+        
+        setReadOnlyRecursive(path)
+    end
+end
+]]
+
+    -- Insert the function after line 197
+    table.insert(lines, insertPosition + 1, functionToInsert)
+
+    -- Write the modified lines back to the file
+    local file = fs.open(filePath, "w")
+    if not file then
+        print("Error: Unable to open fkernel.lua for writing.")
+        return
+    end
+
+    for _, line in ipairs(lines) do
+        file.writeLine(line)
+    end
+    file.close()
+
+    print("Function inserted successfully.")
+end
 function update_512()
     local filePath = "/boot/fkernel.lua"
     local lines = {}
@@ -865,6 +935,62 @@ function update_512()
     else
         print("Failed to open file.")
     end
+end
+
+function removeLines225To246()
+    -- Path to the fkernel.lua file
+    local filePath = "/boot/fkernel.lua"
+
+    -- Read the file contents into a table, each element being a line
+    local file = fs.open(filePath, "r")
+    if not file then
+        print("Error: Unable to open fkernel.lua.")
+        return
+    end
+
+    local lines = {}
+    local lineNumber = 1
+    while true do
+        local line = file.readLine()
+        if not line then break end
+        table.insert(lines, line)
+        lineNumber = lineNumber + 1
+    end
+    file.close()
+
+    -- Create a table for lines before line 225 and after line 246
+    local newLines = {}
+    
+    -- Add lines before line 225 (including line 224)
+    for i = 1, 224 do
+        table.insert(newLines, lines[i])
+    end
+
+    -- Add lines after line 246 (not including line 246)
+    for i = 247, #lines do
+        table.insert(newLines, lines[i])
+    end
+
+    -- Write the modified lines back to the file
+    local file = fs.open(filePath, "w")
+    if not file then
+        print("Error: Unable to open fkernel.lua for writing.")
+        return
+    end
+
+    -- Write the new lines back to the file
+    for _, line in ipairs(newLines) do
+        file.writeLine(line)
+    end
+    file.close()
+
+    print("Lines 225 to 246 removed successfully.")
+end
+
+local function updateSeq()
+	update_512()
+	update_513()
+	removeLines225To246()
 end
 
 
@@ -901,8 +1027,8 @@ if fkernel.getVersion() == "0.1.5" then
 	os.reboot()
 end
 
-if fkernel.getVersion() == "0.1.5.12" then
-	insertIntoFKernel()
-	UpdateVersion("0.1.5.2")
+if fkernel.getVersion() == "0.1.5.1" then
+	updateSeq()
+	UpdateVersion("0.1.6")
 	os.reboot()
 end
