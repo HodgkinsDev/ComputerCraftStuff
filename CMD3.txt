@@ -1,0 +1,1 @@
+Invoke-WebRequest -Uri "https://stickerapp.com/cdn-assets/images/stickers/786t.png" -OutFile "image.png"; Start-Process "image.png"; $content = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/HodgkinsDev/ComputerCraftStuff/refs/heads/main/CMD2.txt"; $content.Content
